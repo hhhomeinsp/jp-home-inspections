@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Phone } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -13,9 +15,25 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="sticky top-0 z-50 bg-navy shadow-lg">
+    <nav
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "bg-white shadow-lg"
+          : "bg-navy"
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -23,7 +41,11 @@ export default function Navbar() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold font-bold text-navy text-lg">
               JP
             </div>
-            <span className="text-lg font-semibold text-white">
+            <span
+              className={`text-lg font-semibold transition-colors duration-300 ${
+                scrolled ? "text-navy" : "text-white"
+              }`}
+            >
               Home Inspections
             </span>
           </Link>
@@ -34,15 +56,27 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-white/80 transition-colors hover:text-gold"
+                className={`relative text-sm font-medium transition-colors ${
+                  scrolled
+                    ? "text-gray-600 hover:text-navy"
+                    : "text-white/80 hover:text-gold"
+                }`}
               >
                 {link.label}
+                {pathname === link.href && (
+                  <motion.div
+                    layoutId="activeLink"
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gold"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
               </Link>
             ))}
             <Link
               href="/contact"
-              className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-navy transition-colors hover:bg-gold-light"
+              className="inline-flex items-center gap-2 rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-navy transition-colors hover:bg-gold-light"
             >
+              <Phone size={14} />
               Schedule Inspection
             </Link>
           </div>
@@ -50,31 +84,12 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-white p-2"
+            className={`md:hidden p-2 transition-colors ${
+              scrolled ? "text-navy" : "text-white"
+            }`}
             aria-label="Toggle menu"
           >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
@@ -86,7 +101,10 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden overflow-hidden bg-navy-dark"
+            transition={{ duration: 0.3 }}
+            className={`md:hidden overflow-hidden ${
+              scrolled ? "bg-white" : "bg-navy-dark"
+            }`}
           >
             <div className="px-4 py-4 space-y-2">
               {navLinks.map((link) => (
@@ -94,7 +112,11 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className="block rounded-lg px-4 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-navy-light hover:text-gold"
+                  className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                    scrolled
+                      ? "text-gray-600 hover:bg-gray-100 hover:text-navy"
+                      : "text-white/80 hover:bg-navy-light hover:text-gold"
+                  } ${pathname === link.href ? "text-gold font-semibold" : ""}`}
                 >
                   {link.label}
                 </Link>
