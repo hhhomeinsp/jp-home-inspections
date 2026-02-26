@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postbuild": "cp -r out/. . && echo Post-build: copied static files to root"
   },
   "dependencies": {
     "framer-motion": "^12.34.3",
